@@ -10,6 +10,24 @@ window.addEventListener("load", ()=>{
 
     class InputHandler
     {
+        constructor(game){
+            this.game = game;
+            
+            window.addEventListener('keydown', e=>{
+                // if arrowup or arrowdown pressed and it's not present in the array it's inserted
+                if(((e.key === "ArrowUp") || (e.key === "ArrowDown")) 
+                    && this.game.keys.indexOf(e.key) === -1){
+                    this.game.keys.push(e.key);
+                }
+            });
+            
+            window.addEventListener('keyup', e=>{
+                
+                if(this.game.keys.indexOf(e.key) > -1){
+                    this.game.keys.splice(this.game.keys.indexOf(e.key), 1);
+                }
+            });
+        }
 
     }
 
@@ -32,9 +50,13 @@ window.addEventListener("load", ()=>{
             this.x = 20;
             this.y = 100;
             this.speedY = 0;
+            this.maxSpeed = 3;
         }
 
         update(){
+            if(this.game.keys.includes('ArrowUp')) this.speedY = -this.maxSpeed;
+            else if(this.game.keys.includes('ArrowDown')) this.speedY = this.maxSpeed;
+            else this.speedY = 0;
             this.y += this.speedY;
         }
 
@@ -69,6 +91,8 @@ window.addEventListener("load", ()=>{
             this.width = width;
             this.height = height;
             this.player = new Player(this);
+            this.input = new InputHandler(this);
+            this.keys = [];
         }
 
         update(){

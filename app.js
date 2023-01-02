@@ -18,6 +18,8 @@ window.addEventListener("load", ()=>{
                 if(((e.key === "ArrowUp") || (e.key === "ArrowDown")) 
                     && this.game.keys.indexOf(e.key) === -1){
                     this.game.keys.push(e.key);
+                }else if( e.key === ' '){
+                    this.game.player.shoot();
                 }
             });
             
@@ -33,7 +35,24 @@ window.addEventListener("load", ()=>{
 
     class Projectile
     {
+        constructor(game, x, y){
+            this.game = game;
+            this.x = x;
+            this.y = y;
+            this.width = 5;
+            this.height = 5;
+            this.speed = 3;
+            this.markedForDeletion = false;
+        }
 
+        update(){
+            this.x += this.speed;
+            if(this.x > this.game.width * 0.8) this.markedForDeletion = true;
+        }
+        draw(context){
+            context.fillStyle = 'red';
+            context.fillRect(this.x, this.y, this.width, this.height);
+        }
     }
 
     class Particle
@@ -51,6 +70,7 @@ window.addEventListener("load", ()=>{
             this.y = 100;
             this.speedY = 0;
             this.maxSpeed = 3;
+            this.projectiles = [];
         }
 
         update(){
@@ -58,10 +78,28 @@ window.addEventListener("load", ()=>{
             else if(this.game.keys.includes('ArrowDown')) this.speedY = this.maxSpeed;
             else this.speedY = 0;
             this.y += this.speedY;
+
+            //handle projectiles
+            this.projectiles.forEach(projectile =>{
+                projectile.update();
+            });
+            this.projectiles = this.projectiles.filter(projectile => !projectile.markedForDeletion);
         }
 
         draw(context){
+            context.fillStyle = 'blue';
             context.fillRect(this.x, this.y, this.width, this.height);
+
+            this.projectiles.forEach(projectile =>{
+                projectile.draw(context);
+            });
+        }
+
+        shoot(){
+            if(this.game.ammo >0 ){
+                this.projectiles.push(new Projectile(this.game, this.x + 40, this.y + 25));
+                this.game.ammo--;
+            }
         }
     }
 
@@ -93,6 +131,7 @@ window.addEventListener("load", ()=>{
             this.player = new Player(this);
             this.input = new InputHandler(this);
             this.keys = [];
+            this.ammo = 20;
         }
 
         update(){
